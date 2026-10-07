@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Slot Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; text-align: center; }
+        h1 { color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; }
+        .slot { padding: 20px; border-radius: 8px; font-weight: bold; width: 120px; color: white; }
+        .available { background-color: #28a745; }
+        .occupied { background-color: #dc3545; }
+        .form-group { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+        input, select, button { padding: 10px; margin: 5px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; }
+        button { background-color: #007bff; color: white; cursor: pointer; border: none; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Parking Slot Manager</h1>
+    
+    <!-- Display Parking Slots -->
+    <div class="grid" id="slots-container">
+        <!-- Slots will be loaded here via JavaScript -->
+    </div>
+
+    <!-- Add New Slot Form -->
+    <div class="form-group">
+        <h3>Add New Parking Slot</h3>
+        <input type="number" id="slot-id" placeholder="Slot ID (e.g., 3)" required>
+        <select id="slot-status">
+            <option value="Available">Available</option>
+            <option value="Occupied">Occupied</option>
+        </select>
+        <button onclick="addSlot()">Add Slot</button>
+    </div>
+</div>
+
+<script>
+    // Fetch slots from the GET /items API backend
+    async function loadSlots() {
+        const response = await fetch('/items');
+        const slots = await response.json();
+        const container = document.getElementById('slots-container');
+        container.innerHTML = '';
+
+        slots.forEach(slot => {
+            const div = document.createElement('div');
+            // Apply green class for Available, red class for Occupied
+            div.className = `slot ${slot.status.toLowerCase()}`;
+            div.innerHTML = `Slot ${slot.id}<br><small>${slot.status}</small>`;
+            container.appendChild(div);
+        });
+    }
+
+    // Send new slot to the POST /items API backend
+    async function addSlot() {
+        const id = document.getElementById('slot-id').value;
+        const status = document.getElementById('slot-status').value;
+
+        if (!id) return alert("Please enter a Slot ID");
+
+        await fetch('/items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: parseInt(id), status: status })
+        });
+
+        document.getElementById('slot-id').value = ''; // clear input
+        loadSlots(); // refresh the UI
+    }
+
+    // Load slots on page load
+    window.onload = loadSlots;
+</script>
+
+</body>
+</html>

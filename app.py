@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
@@ -10,6 +10,12 @@ parking_slots = [
     {"id": 2, "status": "Occupied"}
 ]
 
+# Serve the HTML Frontend
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+# Existing Backend API Endpoints
 @app.route('/items', methods=['GET'])
 def get_slots():
     return jsonify(parking_slots), 200
