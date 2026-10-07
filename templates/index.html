@@ -9,13 +9,15 @@
         h1 { color: #333; }
         .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; }
-        .slot { padding: 20px; border-radius: 8px; font-weight: bold; width: 120px; color: white; }
+        .slot { padding: 15px; border-radius: 8px; font-weight: bold; width: 120px; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .available { background-color: #28a745; }
         .occupied { background-color: #dc3545; }
         .form-group { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
         input, select, button { padding: 10px; margin: 5px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; }
-        button { background-color: #007bff; color: white; cursor: pointer; border: none; }
-        button:hover { background-color: #0056b3; }
+        .btn-add { background-color: #007bff; color: white; cursor: pointer; border: none; font-weight: bold; }
+        .btn-add:hover { background-color: #0056b3; }
+        .btn-delete { margin-top: 10px; padding: 5px 10px; font-size: 12px; background-color: rgba(255,255,255,0.25); color: white; border: 1px solid white; cursor: pointer; border-radius: 4px; }
+        .btn-delete:hover { background-color: white; color: #333; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -25,7 +27,7 @@
     
     <!-- Display Parking Slots -->
     <div class="grid" id="slots-container">
-        <!-- Slots will be loaded here via JavaScript -->
+        <!-- Slots will be loaded here dynamically via JavaScript -->
     </div>
 
     <!-- Add New Slot Form -->
@@ -36,7 +38,7 @@
             <option value="Available">Available</option>
             <option value="Occupied">Occupied</option>
         </select>
-        <button onclick="addSlot()">Add Slot</button>
+        <button class="btn-add" onclick="addSlot()">Add Slot</button>
     </div>
 </div>
 
@@ -48,11 +50,20 @@
         const container = document.getElementById('slots-container');
         container.innerHTML = '';
 
+        // Sort the slots numerically by ID so they always display in order
+        slots.sort((a, b) => a.id - b.id);
+
         slots.forEach(slot => {
             const div = document.createElement('div');
-            // Apply green class for Available, red class for Occupied
+            // Apply green background for Available, red for Occupied
             div.className = `slot ${slot.status.toLowerCase()}`;
-            div.innerHTML = `Slot ${slot.id}<br><small>${slot.status}</small>`;
+            
+            // Render the slot details and the Remove button
+            div.innerHTML = `
+                <span>Slot ${slot.id}</span>
+                <small>${slot.status}</small>
+                <button class="btn-delete" onclick="deleteSlot(${slot.id})">Remove</button>
+            `;
             container.appendChild(div);
         });
     }
@@ -62,19 +73,34 @@
         const id = document.getElementById('slot-id').value;
         const status = document.getElementById('slot-status').value;
 
-        if (!id) return alert("Please enter a Slot ID");
+        if (!id) return alert("Please enter a Slot ID.");
 
-        await fetch('/items', {
+        const response = await fetch('/items', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: parseInt(id), status: status })
         });
 
+        // Check if the backend rejected the duplicate slot
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(errorData.message); // Show the error pop-up
+            return;
+        }
+
         document.getElementById('slot-id').value = ''; // clear input
         loadSlots(); // refresh the UI
     }
 
-    // Load slots on page load
+    // Send delete request to DELETE /items/<id> API backend
+    async function deleteSlot(id) {
+        await fetch(`/items/${id}`, {
+            method: 'DELETE'
+        });
+        loadSlots(); // refresh the UI after deleting
+    }
+
+    // Load slots automatically when the page opens
     window.onload = loadSlots;
 </script>
 
