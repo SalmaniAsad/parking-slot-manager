@@ -3,104 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parking Slot Manager</title>
+    <title>Smart Parking Slot Manager</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; text-align: center; }
-        h1 { color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; }
-        .slot { padding: 15px; border-radius: 8px; font-weight: bold; width: 120px; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .available { background-color: #28a745; }
-        .occupied { background-color: #dc3545; }
-        .form-group { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
-        input, select, button { padding: 10px; margin: 5px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; }
-        .btn-add { background-color: #007bff; color: white; cursor: pointer; border: none; font-weight: bold; }
-        .btn-add:hover { background-color: #0056b3; }
-        .btn-delete { margin-top: 10px; padding: 5px 10px; font-size: 12px; background-color: rgba(255,255,255,0.25); color: white; border: 1px solid white; cursor: pointer; border-radius: 4px; }
-        .btn-delete:hover { background-color: white; color: #333; font-weight: bold; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1050px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: #1a202c; margin-top: 0; }
+        
+        /* Portal Navigation Tabs */
+        .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
+        .tab-btn { padding: 12px 28px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; background-color: #edf2f7; color: #4a5568; transition: 0.2s; }
+        .tab-btn.active { background-color: #2b6cb0; color: white; box-shadow: 0 3px 8px rgba(43,108,176,0.3); }
+        
+        .portal-section { display: none; }
+        .portal-section.active { display: block; }
+
+        /* Summary Statistics Cards */
+        .stats-bar { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; }
+        .stat-card { flex: 1; min-width: 180px; background: #f7fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-card h4 { margin: 0 0 8px 0; color: #718096; font-size: 14px; text-transform: uppercase; }
+        .stat-card .num { font-size: 26px; font-weight: bold; color: #2d3748; }
+
+        /* User Portal Layout */
+        .user-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        @media (max-width: 768px) { .user-grid { grid-template-columns: 1fr; } }
+        .card-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; }
+        .card-box h3 { margin-top: 0; color: #2b6cb0; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        
+        .form-control { margin-bottom: 15px; text-align: left; }
+        .form-control label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; }
+        .form-control input, .form-control select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 15px; }
+        
+        .btn { padding: 11px 18px; font-size: 15px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-primary { background-color: #3182ce; color: white; }
+        .btn-primary:hover { background-color: #2b6cb0; }
+        .btn-danger { background-color: #e53e3e; color: white; }
+        .btn-danger:hover { background-color: #c53030; }
+
+        /* Digital Ticket Card */
+        .ticket-card { background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%); border: 2px dashed #3182ce; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; display: none; }
+        .ticket-token { font-size: 28px; font-weight: 800; color: #2b6cb0; letter-spacing: 1px; margin: 8px 0; }
+        .ticket-slot { font-size: 20px; font-weight: bold; background: #2b6cb0; color: white; display: inline-block; padding: 5px 15px; border-radius: 20px; margin-bottom: 10px; }
+        .ticket-details { font-size: 14px; color: #2d3748; margin-bottom: 15px; line-height: 1.6; }
+
+        /* Admin Slot Grid */
+        .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; margin-top: 20px; }
+        .slot-card { padding: 16px; border-radius: 10px; color: white; position: relative; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; min-height: 190px; }
+        .slot-card.available { background: linear-gradient(135deg, #38a169, #2f855a); }
+        .slot-card.occupied { background: linear-gradient(135deg, #e53e3e, #c53030); }
+        .slot-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 8px; margin-bottom: 10px; }
+        .slot-title { font-size: 20px; font-weight: bold; }
+        .slot-badge { font-size: 12px; background: rgba(0,0,0,0.25); padding: 3px 8px; border-radius: 12px; }
+        .slot-info { font-size: 13px; line-height: 1.5; text-align: left; flex-grow: 1; }
+        .slot-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-sm { flex: 1; padding: 6px; font-size: 12px; border-radius: 4px; border: 1px solid white; background: rgba(255,255,255,0.2); color: white; cursor: pointer; font-weight: bold; }
+        .btn-sm:hover { background: white; color: #2d3748; }
+
+        .admin-controls { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .admin-controls input { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; width: 180px; }
+        .admin-controls button { width: auto; padding: 10px 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Parking Slot Manager</h1>
-    
-    <!-- Display Parking Slots -->
-    <div class="grid" id="slots-container">
-        <!-- Slots will be loaded here dynamically via JavaScript -->
+    <h1>🚗 Smart Parking Slot Manager</h1>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('user')">👤 User Portal</button>
+        <button class="tab-btn" onclick="switchTab('admin')">🛠️ Admin Portal</button>
     </div>
 
-    <!-- Add New Slot Form -->
-    <div class="form-group">
-        <h3>Add New Parking Slot</h3>
-        <input type="number" id="slot-id" placeholder="Slot ID (e.g., 3)" required>
-        <select id="slot-status">
-            <option value="Available">Available</option>
-            <option value="Occupied">Occupied</option>
-        </select>
-        <button class="btn-add" onclick="addSlot()">Add Slot</button>
+    <!-- Live Counters -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <h4>Total Slots</h4>
+            <div class="num" id="stat-total">0</div>
+        </div>
+        <div class="stat-card">
+            <h4>Available Slots</h4>
+            <div class="num" id="stat-available" style="color: #38a169;">0</div>
+        </div>
+        <div class="stat-card">
+            <h4>Occupied Slots</h4>
+            <div class="num" id="stat-occupied" style="color: #e53e3e;">0</div>
+        </div>
+        <div class="stat-card" id="revenue-card" style="display: none;">
+            <h4>Active Revenue</h4>
+            <div class="num" id="stat-revenue" style="color: #2b6cb0;">₹0</div>
+        </div>
+    </div>
+
+    <!-- ================= USER PORTAL ================= -->
+    <div id="user-portal" class="portal-section active">
+        <div class="user-grid">
+            <!-- Left: Registration Form -->
+            <div class="card-box">
+                <h3>1. Register & Get Parking Slot</h3>
+                <div class="form-control">
+                    <label>Driver / Owner Name</label>
+                    <input type="text" id="owner-name" placeholder="e.g., Rahul Sharma">
+                </div>
+                <div class="form-control">
+                    <label>Vehicle Registration Number</label>
+                    <input type="text" id="vehicle-no" placeholder="e.g., MH-01-AB-1234" style="text-transform: uppercase;">
+                </div>
+                <div class="form-control">
+                    <label>Vehicle Type</label>
+                    <select id="vehicle-type">
+                        <option value="4-Wheeler">4-Wheeler (Car/SUV - ₹40/hr)</option>
+                        <option value="2-Wheeler">2-Wheeler (Bike/Scooter - ₹20/hr)</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label>Parking Duration (in Hours)</label>
+                    <input type="number" id="duration" min="1" max="24" value="2">
+                </div>
+                <button class="btn btn-primary" onclick="registerVehicle()">Get Random Slot & Token</button>
+            </div>
+
+            <!-- Right: Active Ticket & Leave Slot -->
+            <div class="card-box">
+                <h3>2. Your Parking Pass & Checkout</h3>
+                
+                <!-- Shown immediately after booking -->
+                <div id="active-ticket" class="ticket-card">
+                    <div style="font-size: 13px; font-weight: bold; color: #2b6cb0;">ALLOCATED PARKING PASS</div>
+                    <div class="ticket-token" id="t-token">TKN-0000</div>
+                    <div class="ticket-slot" id="t-slot">Slot #1</div>
+                    <div class="ticket-details" id="t-details"></div>
+                    <button class="btn btn-danger" onclick="leaveCurrentSlot()">🚶 Leave Slot Now</button>
+                </div>
+
+                <!-- Manual Checkout by Token or Vehicle Number -->
+                <div style="margin-top: 15px;">
+                    <p style="font-size: 14px; color: #4a5568;">Already parked? Enter your <b>Token Number</b> or <b>Vehicle Number</b> below when your work is done to vacate your slot:</p>
+                    <div class="form-control">
+                        <input type="text" id="leave-identifier" placeholder="Enter Token (e.g. TKN-1234) or Vehicle No." style="text-transform: uppercase;">
+                    </div>
+                    <button class="btn btn-danger" onclick="leaveByIdentifier()">Leave Slot & Free Up Space</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= ADMIN PORTAL ================= -->
+    <div id="admin-portal" class="portal-section">
+        <h3 style="margin-top: 0; color: #2d3748;">Live Parking Lot Overview & Occupant Details</h3>
+        
+        <div class="slots-grid" id="admin-slots-container">
+            <!-- Dynamically populated via JS -->
+        </div>
+
+        <div class="admin-controls">
+            <strong>Manage Facility:</strong>
+            <input type="number" id="new-slot-id" placeholder="New Slot ID (e.g., 9)">
+            <button class="btn btn-primary" onclick="adminAddSlot()">+ Add New Slot</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // Fetch slots from the GET /items API backend
-    async function loadSlots() {
-        const response = await fetch('/items');
-        const slots = await response.json();
-        const container = document.getElementById('slots-container');
-        container.innerHTML = '';
+    let currentAllocatedToken = null;
 
-        // Sort the slots numerically by ID so they always display in order
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.portal-section').forEach(s => s.classList.remove('active'));
+
+        if (tab === 'user') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('user-portal').classList.add('active');
+            document.getElementById('revenue-card').style.display = 'none';
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('admin-portal').classList.add('active');
+            document.getElementById('revenue-card').style.display = 'block';
+        }
+        loadSlots();
+    }
+
+    async function loadSlots() {
+        const res = await fetch('/items');
+        const slots = await res.json();
         slots.sort((a, b) => a.id - b.id);
 
+        // Calculate Stats
+        const total = slots.length;
+        const available = slots.filter(s => s.status === 'Available').length;
+        const occupied = total - available;
+        let revenue = 0;
+
+        slots.forEach(s => {
+            if (s.status === 'Occupied' && s.booking && s.booking.fee) {
+                revenue += s.booking.fee;
+            }
+        });
+
+        document.getElementById('stat-total').innerText = total;
+        document.getElementById('stat-available').innerText = available;
+        document.getElementById('stat-occupied').innerText = occupied;
+        document.getElementById('stat-revenue').innerText = `₹${revenue}`;
+
+        // Render Admin Grid
+        const adminContainer = document.getElementById('admin-slots-container');
+        adminContainer.innerHTML = '';
+
         slots.forEach(slot => {
-            const div = document.createElement('div');
-            // Apply green background for Available, red for Occupied
-            div.className = `slot ${slot.status.toLowerCase()}`;
-            
-            // Render the slot details and the Remove button
-            div.innerHTML = `
-                <span>Slot ${slot.id}</span>
-                <small>${slot.status}</small>
-                <button class="btn-delete" onclick="deleteSlot(${slot.id})">Remove</button>
+            const isOcc = slot.status === 'Occupied';
+            const b = slot.booking;
+            const card = document.createElement('div');
+            card.className = `slot-card ${slot.status.toLowerCase()}`;
+
+            let infoHTML = `<div style="margin-top: 25px; text-align:center; font-size: 15px; opacity: 0.9;">🟢 Ready for allocation</div>`;
+            if (isOcc && b) {
+                infoHTML = `
+                    <div><strong>🎟️ Token:</strong> ${b.token}</div>
+                    <div><strong>👤 Owner:</strong> ${b.owner_name}</div>
+                    <div><strong>🚘 Vehicle:</strong> ${b.vehicle_no} (${b.vehicle_type})</div>
+                    <div><strong>⏳ Duration:</strong> ${b.duration} hr(s) | <strong>Fee:</strong> ₹${b.fee}</div>
+                    <div><strong>🕒 Check-in:</strong> ${b.booked_at}</div>
+                `;
+            }
+
+            card.innerHTML = `
+                <div>
+                    <div class="slot-header">
+                        <span class="slot-title">Slot ${slot.id}</span>
+                        <span class="slot-badge">${slot.status}</span>
+                    </div>
+                    <div class="slot-info">${infoHTML}</div>
+                </div>
+                <div class="slot-actions">
+                    ${isOcc ? `<button class="btn-sm" onclick="adminForceVacate(${slot.id})">Force Vacate</button>` : ''}
+                    <button class="btn-sm" onclick="adminDeleteSlot(${slot.id})">Remove Slot</button>
+                </div>
             `;
-            container.appendChild(div);
+            adminContainer.appendChild(card);
         });
     }
 
-    // Send new slot to the POST /items API backend
-    async function addSlot() {
-        const id = document.getElementById('slot-id').value;
-        const status = document.getElementById('slot-status').value;
+    async function registerVehicle() {
+        const owner_name = document.getElementById('owner-name').value;
+        const vehicle_no = document.getElementById('vehicle-no').value;
+        const vehicle_type = document.getElementById('vehicle-type').value;
+        const duration = document.getElementById('duration').value;
 
-        if (!id) return alert("Please enter a Slot ID.");
-
-        const response = await fetch('/items', {
+        const res = await fetch('/book', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: parseInt(id), status: status })
+            body: JSON.stringify({ owner_name, vehicle_no, vehicle_type, duration })
         });
 
-        // Check if the backend rejected the duplicate slot
-        if (!response.ok) {
-            const errorData = await response.json();
-            alert(errorData.message); // Show the error pop-up
+        const data = await res.json();
+        if (!res.ok) {
+            alert(data.message);
             return;
         }
 
-        document.getElementById('slot-id').value = ''; // clear input
-        loadSlots(); // refresh the UI
+        // Display Ticket on User Portal
+        currentAllocatedToken = data.booking.token;
+        document.getElementById('active-ticket').style.display = 'block';
+        document.getElementById('t-token').innerText = data.booking.token;
+        document.getElementById('t-slot').innerText = `Allocated: Slot #${data.slot_id}`;
+        document.getElementById('t-details').innerHTML = `
+            <b>Owner:</b> ${data.booking.owner_name} | <b>Vehicle:</b> ${data.booking.vehicle_no}<br>
+            <b>Duration:</b> ${data.booking.duration} Hour(s) | <b>Estimated Fee:</b> ₹${data.booking.fee}
+        `;
+        document.getElementById('leave-identifier').value = data.booking.token;
+
+        // Clear form inputs
+        document.getElementById('owner-name').value = '';
+        document.getElementById('vehicle-no').value = '';
+        loadSlots();
     }
 
-    // Send delete request to DELETE /items/<id> API backend
-    async function deleteSlot(id) {
-        await fetch(`/items/${id}`, {
-            method: 'DELETE'
+    async function leaveCurrentSlot() {
+        if (!currentAllocatedToken) return;
+        await executeLeave({ identifier: currentAllocatedToken });
+    }
+
+    async function leaveByIdentifier() {
+        const id = document.getElementById('leave-identifier').value;
+        if (!id) return alert("Please enter your Token or Vehicle Number!");
+        await executeLeave({ identifier: id });
+    }
+
+    async function adminForceVacate(slot_id) {
+        await executeLeave({ slot_id: slot_id });
+    }
+
+    async function executeLeave(payload) {
+        const res = await fetch('/leave', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-        loadSlots(); // refresh the UI after deleting
+        const data = await res.json();
+        alert(data.message);
+
+        if (res.ok) {
+            document.getElementById('active-ticket').style.display = 'none';
+            document.getElementById('leave-identifier').value = '';
+            currentAllocatedToken = null;
+            loadSlots();
+        }
     }
 
-    // Load slots automatically when the page opens
+    async function adminAddSlot() {
+        const id = document.getElementById('new-slot-id').value;
+        if (!id) return alert("Enter a Slot ID!");
+        const res = await fetch('/items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: parseInt(id), status: "Available" })
+        });
+        const data = await res.json();
+        if (!res.ok) alert(data.message);
+        document.getElementById('new-slot-id').value = '';
+        loadSlots();
+    }
+
+    async function adminDeleteSlot(id) {
+        await fetch(`/items/${id}`, { method: 'DELETE' });
+        loadSlots();
+    }
+
     window.onload = loadSlots;
 </script>
 
