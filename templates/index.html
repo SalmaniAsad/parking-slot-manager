@@ -7,7 +7,7 @@
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1050px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .container { max-width: 1150px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
         h1 { text-align: center; color: #1a202c; margin-top: 0; }
         
         /* Portal Navigation Tabs */
@@ -39,6 +39,8 @@
         .btn-primary:hover { background-color: #2b6cb0; }
         .btn-danger { background-color: #e53e3e; color: white; }
         .btn-danger:hover { background-color: #c53030; }
+        .btn-secondary { background-color: #718096; color: white; width: auto; padding: 8px 16px; font-size: 14px; }
+        .btn-secondary:hover { background-color: #4a5568; }
 
         /* Digital Ticket Card */
         .ticket-card { background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%); border: 2px dashed #3182ce; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; display: none; }
@@ -46,21 +48,30 @@
         .ticket-slot { font-size: 20px; font-weight: bold; background: #2b6cb0; color: white; display: inline-block; padding: 5px 15px; border-radius: 20px; margin-bottom: 10px; }
         .ticket-details { font-size: 14px; color: #2d3748; margin-bottom: 15px; line-height: 1.6; }
 
+        /* Admin Login Box */
+        .login-box { max-width: 420px; margin: 40px auto; background: #f8fafc; border: 1px solid #cbd5e0; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .login-box h3 { margin-top: 0; color: #2d3748; }
+
+        /* Admin Filter & Toolbar */
+        .admin-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .filter-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .filter-group select, .filter-group input { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
+
         /* Admin Slot Grid */
-        .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; margin-top: 20px; }
-        .slot-card { padding: 16px; border-radius: 10px; color: white; position: relative; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; min-height: 190px; }
+        .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; margin-top: 15px; max-height: 620px; overflow-y: auto; padding: 5px; }
+        .slot-card { padding: 14px; border-radius: 10px; color: white; position: relative; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; min-height: 175px; }
         .slot-card.available { background: linear-gradient(135deg, #38a169, #2f855a); }
         .slot-card.occupied { background: linear-gradient(135deg, #e53e3e, #c53030); }
-        .slot-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 8px; margin-bottom: 10px; }
-        .slot-title { font-size: 20px; font-weight: bold; }
-        .slot-badge { font-size: 12px; background: rgba(0,0,0,0.25); padding: 3px 8px; border-radius: 12px; }
-        .slot-info { font-size: 13px; line-height: 1.5; text-align: left; flex-grow: 1; }
-        .slot-actions { display: flex; gap: 8px; margin-top: 12px; }
-        .btn-sm { flex: 1; padding: 6px; font-size: 12px; border-radius: 4px; border: 1px solid white; background: rgba(255,255,255,0.2); color: white; cursor: pointer; font-weight: bold; }
+        .slot-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 6px; margin-bottom: 8px; }
+        .slot-title { font-size: 18px; font-weight: bold; }
+        .slot-badge { font-size: 11px; background: rgba(0,0,0,0.25); padding: 3px 8px; border-radius: 12px; }
+        .slot-info { font-size: 12.5px; line-height: 1.5; text-align: left; flex-grow: 1; }
+        .slot-actions { display: flex; gap: 6px; margin-top: 10px; }
+        .btn-sm { flex: 1; padding: 5px; font-size: 11.5px; border-radius: 4px; border: 1px solid white; background: rgba(255,255,255,0.2); color: white; cursor: pointer; font-weight: bold; }
         .btn-sm:hover { background: white; color: #2d3748; }
 
-        .admin-controls { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .admin-controls input { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; width: 180px; }
+        .admin-controls { margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .admin-controls input { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; width: 190px; }
         .admin-controls button { width: auto; padding: 10px 20px; }
     </style>
 </head>
@@ -72,18 +83,18 @@
     <!-- Navigation Tabs -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('user')">👤 User Portal</button>
-        <button class="tab-btn" onclick="switchTab('admin')">🛠️ Admin Portal</button>
+        <button class="tab-btn" onclick="switchTab('admin')">🔒 Admin Portal</button>
     </div>
 
     <!-- Live Counters -->
     <div class="stats-bar">
         <div class="stat-card">
             <h4>Total Slots</h4>
-            <div class="num" id="stat-total">0</div>
+            <div class="num" id="stat-total">100</div>
         </div>
         <div class="stat-card">
             <h4>Available Slots</h4>
-            <div class="num" id="stat-available" style="color: #38a169;">0</div>
+            <div class="num" id="stat-available" style="color: #38a169;">100</div>
         </div>
         <div class="stat-card">
             <h4>Occupied Slots</h4>
@@ -150,22 +161,50 @@
 
     <!-- ================= ADMIN PORTAL ================= -->
     <div id="admin-portal" class="portal-section">
-        <h3 style="margin-top: 0; color: #2d3748;">Live Parking Lot Overview & Occupant Details</h3>
         
-        <div class="slots-grid" id="admin-slots-container">
-            <!-- Dynamically populated via JS -->
+        <!-- Admin Password Lock Screen -->
+        <div id="admin-login-box" class="login-box">
+            <h3>🔒 Admin Authentication Required</h3>
+            <p style="font-size: 14px; color: #718096; margin-bottom: 20px;">This area is restricted to authorized parking administrators only.</p>
+            <div class="form-control">
+                <label>Enter Admin Password</label>
+                <input type="password" id="admin-password" placeholder="Enter password..." onkeydown="if(event.key==='Enter') verifyAdmin()">
+            </div>
+            <button class="btn btn-primary" onclick="verifyAdmin()">Unlock Admin Portal</button>
         </div>
 
-        <div class="admin-controls">
-            <strong>Manage Facility:</strong>
-            <input type="number" id="new-slot-id" placeholder="New Slot ID (e.g., 9)">
-            <button class="btn btn-primary" onclick="adminAddSlot()">+ Add New Slot</button>
+        <!-- Unlocked Admin Dashboard Content -->
+        <div id="admin-dashboard-content" style="display: none;">
+            <div class="admin-toolbar">
+                <div class="filter-group">
+                    <strong>Filter Slots:</strong>
+                    <select id="filter-status" onchange="renderAdminSlots()">
+                        <option value="ALL">Show All Slots</option>
+                        <option value="Occupied">🔴 Occupied Slots Only</option>
+                        <option value="Available">🟢 Available Slots Only</option>
+                    </select>
+                    <input type="text" id="search-slot" placeholder="Search Slot #, Vehicle, Token, Owner..." oninput="renderAdminSlots()">
+                </div>
+                <button class="btn btn-secondary" onclick="logoutAdmin()">🔒 Logout Admin</button>
+            </div>
+            
+            <div class="slots-grid" id="admin-slots-container">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <div class="admin-controls">
+                <strong>Manage Facility:</strong>
+                <input type="number" id="new-slot-id" placeholder="New Slot ID (e.g., 101)">
+                <button class="btn btn-primary" onclick="adminAddSlot()">+ Add New Slot</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
     let currentAllocatedToken = null;
+    let isAdminAuthenticated = false;
+    let allSlotsCache = [];
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -178,15 +217,55 @@
         } else {
             document.querySelectorAll('.tab-btn')[1].classList.add('active');
             document.getElementById('admin-portal').classList.add('active');
-            document.getElementById('revenue-card').style.display = 'block';
+            
+            if (isAdminAuthenticated) {
+                document.getElementById('admin-login-box').style.display = 'none';
+                document.getElementById('admin-dashboard-content').style.display = 'block';
+                document.getElementById('revenue-card').style.display = 'block';
+            } else {
+                document.getElementById('admin-login-box').style.display = 'block';
+                document.getElementById('admin-dashboard-content').style.display = 'none';
+                document.getElementById('revenue-card').style.display = 'none';
+            }
         }
         loadSlots();
+    }
+
+    async function verifyAdmin() {
+        const password = document.getElementById('admin-password').value;
+        if (!password) return alert("Please enter the Admin Password!");
+
+        const res = await fetch('/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.authenticated) {
+            isAdminAuthenticated = true;
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-login-box').style.display = 'none';
+            document.getElementById('admin-dashboard-content').style.display = 'block';
+            document.getElementById('revenue-card').style.display = 'block';
+            renderAdminSlots();
+        } else {
+            alert(data.message || "Incorrect Password!");
+        }
+    }
+
+    function logoutAdmin() {
+        isAdminAuthenticated = false;
+        document.getElementById('admin-login-box').style.display = 'block';
+        document.getElementById('admin-dashboard-content').style.display = 'none';
+        document.getElementById('revenue-card').style.display = 'none';
     }
 
     async function loadSlots() {
         const res = await fetch('/items');
         const slots = await res.json();
         slots.sort((a, b) => a.id - b.id);
+        allSlotsCache = slots;
 
         // Calculate Stats
         const total = slots.length;
@@ -205,17 +284,40 @@
         document.getElementById('stat-occupied').innerText = occupied;
         document.getElementById('stat-revenue').innerText = `₹${revenue}`;
 
-        // Render Admin Grid
+        if (isAdminAuthenticated) {
+            renderAdminSlots();
+        }
+    }
+
+    function renderAdminSlots() {
         const adminContainer = document.getElementById('admin-slots-container');
         adminContainer.innerHTML = '';
 
-        slots.forEach(slot => {
+        const statusFilter = document.getElementById('filter-status').value;
+        const searchQuery = document.getElementById('search-slot').value.trim().toLowerCase();
+
+        const filteredSlots = allSlotsCache.filter(slot => {
+            if (statusFilter !== 'ALL' && slot.status !== statusFilter) return false;
+            if (!searchQuery) return true;
+
+            const matchId = `slot ${slot.id}`.includes(searchQuery) || String(slot.id) === searchQuery;
+            if (slot.status === 'Occupied' && slot.booking) {
+                const b = slot.booking;
+                const matchBooking = b.token.toLowerCase().includes(searchQuery) ||
+                                     b.vehicle_no.toLowerCase().includes(searchQuery) ||
+                                     b.owner_name.toLowerCase().includes(searchQuery);
+                return matchId || matchBooking;
+            }
+            return matchId;
+        });
+
+        filteredSlots.forEach(slot => {
             const isOcc = slot.status === 'Occupied';
             const b = slot.booking;
             const card = document.createElement('div');
             card.className = `slot-card ${slot.status.toLowerCase()}`;
 
-            let infoHTML = `<div style="margin-top: 25px; text-align:center; font-size: 15px; opacity: 0.9;">🟢 Ready for allocation</div>`;
+            let infoHTML = `<div style="margin-top: 25px; text-align:center; font-size: 14px; opacity: 0.9;">🟢 Available for Parking</div>`;
             if (isOcc && b) {
                 infoHTML = `
                     <div><strong>🎟️ Token:</strong> ${b.token}</div>
@@ -236,7 +338,7 @@
                 </div>
                 <div class="slot-actions">
                     ${isOcc ? `<button class="btn-sm" onclick="adminForceVacate(${slot.id})">Force Vacate</button>` : ''}
-                    <button class="btn-sm" onclick="adminDeleteSlot(${slot.id})">Remove Slot</button>
+                    <button class="btn-sm" onclick="adminDeleteSlot(${slot.id})">Remove</button>
                 </div>
             `;
             adminContainer.appendChild(card);

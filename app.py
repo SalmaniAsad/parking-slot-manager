@@ -6,16 +6,28 @@ from datetime import datetime
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)  # Enables Prometheus /metrics endpoint
 
-# Initialize 8 Parking Slots by default
+# Admin Portal Password
+ADMIN_PASSWORD = "admin123"
+
+# Initialize 100 Parking Slots by default (Slots 1 to 100)
 parking_slots = [
-    {"id": i, "status": "Available", "booking": None} for i in range(1, 9)
+    {"id": i, "status": "Available", "booking": None} for i in range(1, 101)
 ]
 
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
-# GET: Fetch all parking slots (Used by both User & Admin portals)
+# POST: Verify Admin Password
+@app.route('/admin/login', methods=['POST'])
+def admin_login():
+    data = request.get_json() or {}
+    password = data.get('password', '')
+    if password == ADMIN_PASSWORD:
+        return jsonify({"authenticated": True, "message": "Login successful"}), 200
+    return jsonify({"authenticated": False, "message": "Access Denied: Incorrect Admin Password!"}), 401
+
+# GET: Fetch all parking slots
 @app.route('/items', methods=['GET'])
 def get_slots():
     return jsonify(parking_slots), 200
@@ -70,7 +82,7 @@ def book_slot():
     if not available_slots:
         return jsonify({"message": "Sorry! Parking is Full. No slots available right now."}), 400
 
-    # Pick a random available slot
+    # Pick a random available slot out of the 100 slots
     chosen_slot = random.choice(available_slots)
 
     # Generate a unique Token ID
